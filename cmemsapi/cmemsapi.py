@@ -414,8 +414,10 @@ def get_ncfiles(target_directory, file_pattern=None, year=None):
     return ncfiles
 
 
-def set_outputfile(file_pattern, target_out_directory=Path(DEFAULT_CURRENT_PATH, 'copernicus-processed-data'), start_year=None, end_year=None):
-    if 'str' in str(type(target_out_directory)):
+def set_outputfile(file_pattern, target_directory, target_out_directory=None, start_year=None, end_year=None):
+    if not target_out_directory:
+        target_out_directory = Path(target_directory.parent(), 'copernicus-processed-data')
+    elif 'str' in str(type(target_out_directory)):
         target_out_directory = Path(target_out_directory)
     if not target_out_directory.exists():
         target_out_directory.mkdir(parents=True)
@@ -543,7 +545,7 @@ def to_nc4_csv(ncfiles, outputfile, skip_csv=False, default_nc_size=None):
     return nc4, csv, check_ow
 
 
-def post_processing(outname, target_directory, delete_files=True):
+def post_processing(outname, target_directory, target_out_directory=None, delete_files=True):
     """
     Post-process the data already located on disk: concatenate a complete timerange in a single netcdf file, or if not possible, stack periods on minimum netcdf files (either by year or by month).
 
@@ -573,7 +575,7 @@ def post_processing(outname, target_directory, delete_files=True):
     years = get_years(sel_files)
     try:
         single_outputfile = set_outputfile(
-            file_pattern, start_year=min(years), end_year=max(years))
+            file_pattern, target_directory, target_out_directory, start_year=min(years), end_year=max(years))
     except ValueError as e:
         print(
             f'[ERROR] Processing failed due to no file matching pattern : {e}')
@@ -583,7 +585,7 @@ def post_processing(outname, target_directory, delete_files=True):
             for year in years:
                 print(year)
                 ncfiles = get_ncfiles(target_directory, file_pattern, year)
-                outfilemerged = set_outputfile(file_pattern, start_year=year)
+                outfilemerged = set_outputfile(file_pattern, target_directory, target_out_directory, start_year=year)
                 to_nc4_csv(ncfiles, outfilemerged)
                 if delete_files:
                     del_ncfiles(ncfiles)
@@ -591,7 +593,7 @@ def post_processing(outname, target_directory, delete_files=True):
     return processing
 
 
-def download_data_and_postprocess(local_storage_directory=None, view_myscript=None, user=None, pwd=None, dailystack=False, delete_files=False):
+def download_data_and_postprocess(local_storage_directory=None, target_out_directory=None, view_myscript=None, user=None, pwd=None, dailystack=False, delete_files=False):
     """
     Download and post-process files to both compressed and tabular formats, if applicable.
 
@@ -609,26 +611,26 @@ def download_data_and_postprocess(local_storage_directory=None, view_myscript=No
     post_processing : Method to convert downloaded data to other format (netcdf4, csv etc)
     """
 
-    target_directory = set_target_directory()
+    target_directory = set_target_directory(local_storage_directory)
     outname = process_viewscript(target_directory=target_directory,
                                  view_myscript=view_myscript, user=user, pwd=pwd, dailystack=dailystack)
-    post_processing(outname, target_directory, delete_files=delete_files)
+    post_processing(outname=outname, target_directory=target_directory, target_out_directory=target_out_directory, delete_files=delete_files)
 
 def cli():
-    fire.Fire({
-        'display_disk_stat': display_disk_stat,
-        'download_data_and_postprocess': download_data_and_postprocess,
-        'get_credentials': get_credentials,
-        'get_data': get_data,
-        'get_file_pattern': get_file_pattern,
-        'get_ncfiles': get_ncfiles,
-        'post_processing': post_processing,
-        'process_viewscript': process_viewscript,
-        'set_target_directory': set_target_directory,
-        'to_nc4_csv': to_nc4_csv,
-        'to_nc4': to_nc4,
-        'to_csv': to_csv
-    })
+	fire.Fire({
+		'display_disk_stat': display_disk_stat,
+		'download_data_and_postprocess': download_data_and_postprocess,
+		'get_credentials': get_credentials,
+		'get_data': get_data,
+		'get_file_pattern': get_file_pattern,
+		'get_ncfiles': get_ncfiles,
+		'post_processing': post_processing,
+		'process_viewscript': process_viewscript,
+		'set_target_directory': set_target_directory,
+		'to_nc4_csv': to_nc4_csv,
+		'to_nc4': to_nc4,
+		'to_csv': to_csv
+	})
 
 if __name__ == '__main__':
     cli()

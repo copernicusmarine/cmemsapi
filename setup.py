@@ -10,7 +10,7 @@ with open('README.md') as readme_file:
 #with open('HISTORY.rst') as history_file:
 #    history = history_file.read()
 
-requirements = ["fire motuclient xarray".split(' ')]
+requirements = ["dask fire motuclient netCDF4 scipy toolz xarray ".split(' ')]
 
 setup_requirements = [ ]
 
@@ -43,7 +43,7 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/copernicusmarine/cmemsapi',
-    version='0.1.1',
+    version='0.1.2',
     zip_safe=False,
 	entry_points={'console_scripts':['cmemstb=cmemsapi.cmemsapi:cli']},
 )
