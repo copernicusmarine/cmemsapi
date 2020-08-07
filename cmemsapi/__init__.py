@@ -1,5 +1,5 @@
-"""Top-level package for Copernicus Marine API."""
+"""Top-level package for Copernicus Marine ToolBox."""
 
-__author__ = """Copernicus Marine Service Desk"""
+__author__ = """E.U. Copernicus Marine Service Information"""
 __email__ = 'servicedesk.cmems@mercator-ocean.eu'
-__version__ = '0.1.0'
+__version__ = '0.1.1'

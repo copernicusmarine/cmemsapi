@@ -40,7 +40,7 @@ templates_path = ['_templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
 
 # The master toctree document.
 master_doc = 'index'
@@ -83,7 +83,14 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'sphinx_book_theme'
+html_theme_options = {
+    'repository_url': 'https://github.com/spatialaudio/nbsphinx',
+    'use_repository_button': True,
+    'use_issues_button': True,
+    'use_edit_page_button': True,
+    'path_to_docs': 'docs'
+}
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
