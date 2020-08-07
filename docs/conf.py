@@ -88,7 +88,8 @@ html_theme_options = {
     'repository_url': 'https://github.com/spatialaudio/nbsphinx',
     'use_repository_button': True,
     'use_issues_button': True,
-    'use_edit_page_button': True
+    'use_edit_page_button': True,
+    'path_to_docs': 'docs'
 }
 
 # Theme options are theme-specific and customize the look and feel of a
