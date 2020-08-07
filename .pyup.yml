@@ -1,0 +1,14 @@
+# configure updates globally
+update: insecure
+
+# configure dependency pinning globally
+pin: False
+
+# set the default branch
+branch: master
+
+# update schedule
+schedule: "every week"
+
+# search for requirement files
+search: True
