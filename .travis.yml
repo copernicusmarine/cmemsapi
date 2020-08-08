@@ -13,5 +13,7 @@ deploy:
     secure: JHIFds7a1SQd86Z7A+P88BVQGo18LjwhxXSL1InsvvYKjzVLF+hYaI6t/7tVjsw9zXOAdD3H6m7OxJb7l8HfJGEVhBEu1ftIlsCYlkRqKYO/+IDgtF8npdi9ZYLWD4xJLr5IPdKCq1ZciFm1cy7LsElWGou+tzJIhXZqeR/fwugbrvGywJ9sLcNRSrpOBJ5GF1+YLp6ui5I4z5A79aHvVJ1tNEAeuL1wEJ4OOey7y8mNS/Fu7CDt7uKW+wmn840n8vAm0UKmu35HFwqTo+Caa+NHtlbcP0l/Z0puhlzj+yCg3TyDZGwFx9KxH47cugZ/8V27XpQGo4mE26uupI+DhCJIkbYCOPWzKLkLegqxvKJdQxbPB+hWj/hvdYgUuUBR+noj/1hnGeAilfWfLV8gLKs39GR6LAMfJAuI0rdlOabVYMEMhH2H6P6YJsbhYeezL9QDdcoDLUrgIQ3QqCocEZxlXoaYFduCUQu16iWmummlHqHVVmv7qQ1gxX5JLgOiu2rmKWzV7aSvkxC/Q1O3m/Bsd0YqleXXHakUxh9wGZC6WkrIlgNm68u8WXbS8+F5z1e+yQ6KEIG96SwHAuQ/RycpwU+i4A6Vm6Cej+t1s+Yh75iIf9mWYGSzMmasuOcDiNZol7uzOrQ+1rWWD+rR2YuuBmrEs8KIzll50bTr6sI=
   on:
     tags: true
+    branch:
+      - master
     repo: copernicusmarine/cmemsapi
     python: 3.8
