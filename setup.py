@@ -43,7 +43,7 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/copernicusmarine/cmemsapi',
-    version='0.1.3',
+    version='0.1.4',
     zip_safe=False,
 	entry_points={'console_scripts':['cmemstb=cmemsapi.cmemsapi:cli']},
 )
