@@ -58,7 +58,6 @@ setup(
     keywords='cmemsapi',
     name='cmemsapi',
     packages=find_packages(include=['cmemsapi', 'cmemsapi.*']),
-    python_requires=">=3.6",
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
