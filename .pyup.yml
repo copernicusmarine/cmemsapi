@@ -11,4 +11,8 @@ branch: master
 schedule: "every week"
 
 # search for requirement files
-search: True
+search: False
+
+requirements:
+  - requirement_prod.txt:
+      update: insecure

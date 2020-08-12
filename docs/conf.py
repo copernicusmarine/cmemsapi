@@ -20,7 +20,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
-
+from recommonmark.parser import CommonMarkParser
 import cmemsapi
 
 # -- General configuration ---------------------------------------------
@@ -38,7 +38,11 @@ templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-#
+
+source_parsers = {
+    '.md': CommonMarkParser,
+}
+
 # source_suffix = ['.rst', '.md']
 source_suffix = ['.rst', '.md']
 
@@ -46,7 +50,7 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 # General information about the project.
-project = 'Copernicus Marine API'
+project = 'Copernicus Marine ToolBox'
 copyright = "2020, Copernicus Marine Service Desk"
 author = "Copernicus Marine Service Desk"
 
@@ -85,7 +89,7 @@ todo_include_todos = False
 #
 html_theme = 'sphinx_book_theme'
 html_theme_options = {
-    'repository_url': 'https://github.com/spatialaudio/nbsphinx',
+    'repository_url': 'https://github.com/copernicusmarine/cmemsapi',
     'use_repository_button': True,
     'use_issues_button': True,
     'use_edit_page_button': True,
