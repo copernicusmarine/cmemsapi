@@ -1,14 +1,13 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Copyright (C) 2020 E.U. Copernicus Marine Service Information
 
-"""The setup script."""
-
-from setuptools import setup, find_packages
 import sys
-import os
+from pathlib import Path  # noqa E402
+
+from setuptools import find_packages, setup
 
 assert sys.version_info >= (3, 6, 0), "cmtb requires Python 3.6+"
-from pathlib import Path # noqa E402
 
 CURRENT_DIR = Path(__file__).parent
 sys.path.insert(0, str(CURRENT_DIR))
@@ -24,13 +23,14 @@ sys.path.insert(0, str(CURRENT_DIR))
 #    history = history_file.read()
 
 with open('README.md') as readme_file:
-    readme = readme_file.read()
+    README = readme_file.read()
 
-requirements = [line.strip() for line in open('requirements_prod.txt')]
+#REQUIREMENTS = [line.strip() for line in open('requirements_prod.txt')]
+REQUIREMENTS = ["dask fire ipython lxml motuclient netCDF4 scipy toolz xarray ".split(' ')]
 
-setup_requirements = [ ]
+SETUP_REQUIREMENTS = []
 
-test_requirements = [ ]
+TEST_REQUIREMENTS = []
 
 setup(
     author="E.U. Copernicus Marine Service Information",
@@ -49,20 +49,22 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Topic :: Scientific/Engineering',
     ],
-    description="A package to help generating reliable data requests about earth observation and marine related information from Copernicus Marine Database.",
-    install_requires=requirements,
+    description="A package to help generating reliable data requests"
+    " about earth observation and marine related information "
+    "from Copernicus Marine Database.",
+    install_requires=REQUIREMENTS,
     license="MIT",
-    long_description=readme,
+    long_description=README,
     long_description_content_type="text/markdown",
     include_package_data=True,
     keywords='cmemsapi',
     name='cmemsapi',
     packages=find_packages(include=['cmemsapi', 'cmemsapi.*']),
-    setup_requires=setup_requirements,
+    setup_requires=SETUP_REQUIREMENTS,
     test_suite='tests',
-    tests_require=test_requirements,
+    tests_require=TEST_REQUIREMENTS,
     url='https://github.com/copernicusmarine/cmemsapi',
     version='0.1.7',
     zip_safe=False,
-	entry_points={'console_scripts':['cmemstb=cmemsapi.cmemsapi:cli']},
+    entry_points={'console_scripts':['cmemstb=cmemsapi.cmemsapi:cli']},
 )
