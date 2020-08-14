@@ -31,7 +31,7 @@ import cmemsapi
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'recommonmark', "sphinx.ext.intersphinx", "sphinx.ext.napoleon"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -73,7 +73,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'dev-sphinx-api']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -165,9 +165,16 @@ texinfo_documents = [
      'Copernicus Marine API Documentation',
      author,
      'cmemsapi',
-     'One line description of project.',
+     'ToolBox to ease data manipulation.',
      'Miscellaneous'),
 ]
 
+# -- Extension configuration -------------------------------------------------
 
+autodoc_member_order = "bysource"
+
+# -- Options for intersphinx extension ---------------------------------------
+
+# Example configuration for intersphinx: refer to the Python standard library.
+intersphinx_mapping = {"https://docs.python.org/3/": None}
 

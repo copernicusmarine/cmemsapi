@@ -1,5 +1,5 @@
-Welcome to Copernicus Marine API's documentation!
-======================================
+Welcome to Copernicus Marine ToolBox's documentation
+====================================================
 
 .. toctree::
    :maxdepth: 2

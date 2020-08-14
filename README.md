@@ -1,13 +1,14 @@
-# Copernicus Marine Toolbox
+<h1 align="center">Copernicus Marine Toolbox</h1>
 
-[![Build Status](https://img.shields.io/travis/copernicusmarine/cmemsapi/master.svg?logo=travis)](https://travis-ci.org/copernicusmarine/cmemsapi)
-[![Documentation Status](https://readthedocs.org/projects/cmemsapi/badge/?version=latest)](https://cmemsapi.readthedocs.io/en/latest/?badge=latest)
-[![MIT License badge](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/copernicusmarine/cmemsapi/blob/master/LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/cmemsapi.svg)](https://github.com/copernicusmarine/cmemsapi)
-[![Updates](https://pyup.io/repos/github/copernicusmarine/cmemsapi/shield.svg)](https://pyup.io/repos/github/copernicusmarine/cmemsapi/)
-[![Python 3](https://pyup.io/repos/github/copernicusmarine/cmemsapi/python-3-shield.svg)](https://pyup.io/repos/github/copernicusmarine/cmemsapi/)
-[![PyPI Supported Versions](https://img.shields.io/pypi/pyversions/cmemsapi.svg)](https://github.com/copernicusmarine/cmemsapi)
-[![Supported Platforms"](https://img.shields.io/badge/platform-windows%20%7C%20linux%20%7C%20macos-lightgrey)](https://github.com/copernicusmarine/cmemsapi)
+<p align"=center">
+    <a href="https://travis-ci.org/copernicusmarine/cmemsapi"><img src="https://img.shields.io/travis/copernicusmarine/cmemsapi/master.svg?logo=travis" alt="Build Status" /></a> <a href="https://cmemsapi.readthedocs.io/en/latest/?badge=latest"><img src="https://readthedocs.org/projects/cmemsapi/badge/?version=latest" alt="Documentation Status" /></a>
+    <a href="https://github.com/copernicusmarine/cmemsapi/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT License badge" /></a>
+    <a href="https://github.com/copernicusmarine/cmemsapi"><img src="https://img.shields.io/pypi/v/cmemsapi.svg" alt="PyPI" /></a>
+    <a href="https://pyup.io/repos/github/copernicusmarine/cmemsapi/"><img src="https://pyup.io/repos/github/copernicusmarine/cmemsapi/shield.svg" alt="Updates" /></a>
+    <a href="https://pyup.io/repos/github/copernicusmarine/cmemsapi/"><img src="https://pyup.io/repos/github/copernicusmarine/cmemsapi/python-3-shield.svg" alt="Python 3" /></a>
+    <a href="https://github.com/copernicusmarine/cmemsapi"><img src="https://img.shields.io/pypi/pyversions/cmemsapi.svg" alt="PyPI Supported Versions" /></a>
+    <a href="https://github.com/copernicusmarine/cmemsapi"><img src="https://img.shields.io/badge/platform-windows%20%7C%20linux%20%7C%20macos-lightgrey" alt="Supported Platforms" /></a>
+</p>
 
 A python package behaving as `Tooolbox` to ease interaction with [Copernicus Marine Earth Observation Database](https://marine.copernicus.eu) (pre-process, get and post-process data) while offering CLI & GUI capabilities.
 

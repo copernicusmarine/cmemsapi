@@ -197,8 +197,12 @@ def get_credentials(file_rc=None, sep='='):
     copernicus_username = ''.join(lines[0].strip().split(sep)[1:])
     copernicus_password = ''.join(lines[1].strip().split(sep)[1:])
     if not check_credentials(copernicus_username, copernicus_password):
+        if file_rc.exists():
+            msg = f' from content of {file_rc}'
+        else:
+            msg = ''
         print('[ERROR] Provided username and/or password could not be validated.\n'
-              f'[WARNING] Please double check content of {file_rc}. More help at: '
+              f'[WARNING] Please double check it{msg}. More help at: '
               'https://marine.copernicus.eu/faq/forgotten-password/?idpage=169')
         raise SystemExit
     print('[INFO] Credentials have been succcessfully verified and loaded.')
@@ -262,12 +266,14 @@ def check_data_size(command, user, pwd):
             '--user <USERNAME> --pwd <PASSWORD>', '--size'),
         '-q -o console -u ', user, ' -p ', pwd
     ])
-    cmd_rep = command.replace(command_size.split(' ')[-1], '****')
+    print(command_size)
+    cmd_rep = command_size.replace(command_size.split(' ')[-1], '****')
     logging.info("DATA SIZE CHECK FOR: %s", cmd_rep)
     process = subprocess.Popen(
         command_size, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     message, _ = process.communicate()
     returncode = process.returncode
+    print(returncode)
     if returncode == 0:
         if b'code="005-0"' not in message:
             if convert_size_hr(
@@ -501,7 +507,7 @@ def process_viewscript(target_directory, view_myscript=None,
             try:
                 outname = '-'.join(['CMEMS', prefix, gridpoint, out_var_name,
                                     date_end_format + suffix])
-            except KeyError:
+            except UnboundLocalError:
                 outname = '-'.join(['CMEMS', prefix, out_var_name,
                                     date_end_format + suffix])
             command = ' '.join([multireplace(view_script_command, substitute),
@@ -1126,8 +1132,7 @@ def post_processing(outname, target_directory, target_out_directory=None,
 def get(local_storage_directory=None, target_out_directory=None,
         view_myscript=None, user=None, pwd=None, dailystack=False,
         delete_files=False):
-    """
-    Download and post-process files to both compressed and tabular formats,
+    """Download and post-process files to both compressed and tabular formats,
     if applicable.
 
     Download as many subsets of dataset required
@@ -1174,15 +1179,7 @@ def get(local_storage_directory=None, target_out_directory=None,
 
     Ex 2. Get data matching a ``VIEW SCRIPT`` template command:
 
-    >>> cmemstb get --view_myscript="python -m motuclient
-    --motu http://nrt.cmems-du.eu/motu-web/Motu
-    --service-id GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS
-    --product-id global-analysis-forecast-phy-001-024
-    --longitude-min -20 --longitude-max 45 --latitude-min 25 --latitude-max 72
-    --date-min \"2020-08-18 12:00:00\" --date-max \"2020-08-21 12:00:00\"
-    --depth-min 0.493 --depth-max 0.4942 --variable thetao
-    --out-dir <OUTPUT_DIRECTORY> --out-name <OUTPUT_FILENAME>
-    --user <USERNAME> --pwd <PASSWORD>"
+    >>> cmemstb get --view_myscript="python -m motuclient --motu http://nrt.cmems-du.eu/motu-web/Motu --service-id GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS --product-id global-analysis-forecast-phy-001-024 --longitude-min -20 --longitude-max 45 --latitude-min 25 --latitude-max 72 --date-min \"2020-08-18 12:00:00\" --date-max \"2020-08-21 12:00:00\" --depth-min 0.493 --depth-max 0.4942 --variable thetao --out-dir <OUTPUT_DIRECTORY> --out-name <OUTPUT_FILENAME> --user <USERNAME> --pwd <PASSWORD>"
     """
     target_directory = set_target_directory(local_storage_directory)
     outname = process_viewscript(target_directory=target_directory,
