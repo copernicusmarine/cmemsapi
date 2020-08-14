@@ -22,8 +22,8 @@ sys.path.insert(0, str(CURRENT_DIR))
 #with open('HISTORY.rst') as history_file:
 #    history = history_file.read()
 
-with open('README.md') as readme_file:
-    README = readme_file.read()
+#with open('README.md') as readme_file:
+#    README = readme_file.read()
 
 #REQUIREMENTS = [line.strip() for line in open('requirements_prod.txt')]
 REQUIREMENTS = ["dask fire ipython lxml motuclient netCDF4 requests scipy toolz xarray ".split(' ')]
@@ -52,7 +52,7 @@ setup(
     "from Copernicus Marine Database.",
     install_requires=REQUIREMENTS,
     license="MIT",
-    long_description=README,
+    long_description='long description',
     long_description_content_type="text/markdown",
     include_package_data=True,
     keywords='cmemsapi',
