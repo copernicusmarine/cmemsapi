@@ -5,9 +5,15 @@ Credits
 Development Lead
 ----------------
 
-* Copernicus Marine Service Desk <servicedesk.cmems@mercator-ocean.eu>
+* Copernicus Marine Service Desk <servicedesk.cmemsATmercator-ocean.eu>
+* C Giordan
+
 
 Contributors
 ------------
 
-None yet. Why not be the first?
+* D Obaton
+* M Tressol
+* M Clavier
+* C Regnier
+* E Di Medio
