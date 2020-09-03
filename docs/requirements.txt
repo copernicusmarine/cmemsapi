@@ -11,3 +11,4 @@ sphinx-gallery
 jupytext
 sphinx-last-updated-by-git
 recommonmark
+fire
