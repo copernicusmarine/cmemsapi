@@ -6,6 +6,7 @@ sphinxcontrib-bibtex
 sphinxcontrib-svg2pdfconverter
 sphinx-book-theme
 ipywidgets
+sphinx-autoapi
 sphinx-copybutton
 sphinx-gallery
 jupytext
