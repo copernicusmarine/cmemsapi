@@ -1,5 +1,6 @@
 dask==2.22.0
 fire==0.3.1
+funcy==1.14
 ipython==7.17.0
 lxml==4.5.2
 motuclient==1.8.4
