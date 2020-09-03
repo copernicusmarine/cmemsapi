@@ -26,7 +26,7 @@ sys.path.insert(0, str(CURRENT_DIR))
 #    README = readme_file.read()
 
 #REQUIREMENTS = [line.strip() for line in open('requirements_prod.txt')]
-REQUIREMENTS = ["dask fire ipython lxml motuclient netCDF4 requests scipy toolz xarray ".split(' ')]
+REQUIREMENTS = ["dask fire funcy ipython lxml motuclient netCDF4 requests scipy toolz xarray ".split(' ')]
 
 SETUP_REQUIREMENTS = []
 
