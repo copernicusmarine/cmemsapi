@@ -22,6 +22,7 @@ from pathlib import Path
 import requests as rq
 import fire
 import lxml.html
+import pandas as pd
 import xarray as xr
 from funcy import omit
 
@@ -273,7 +274,7 @@ def get_credentials(file_rc=None, sep='='):
             f'[WARNING] Please double check it{msg}. More help at: '
             'https://marine.copernicus.eu/faq/forgotten-password/?idpage=169')
         raise SystemExit
-    print('[INFO] Credentials have been succcessfully verified and loaded.')
+    print('[INFO] Credentials have been succcessfully loaded and verified.')
     return copernicus_username, copernicus_password
 
 
@@ -323,7 +324,7 @@ def get_viewscript():
         webportal. Example is available at https://tiny.cc/get-viewscript-from-web
     """
     uni_test = [
-        'python -m motuclient --motu http://', ' '.join([
+        'python -m motuclient --motu http', ' '.join([
             '--out-dir <OUTPUT_DIRECTORY> --out-name <OUTPUT_FILENAME>',
             '--user <USERNAME> --pwd <PASSWORD>'
         ])
@@ -372,10 +373,16 @@ def viewscript_string_to_dict(viewmy_script):
     except KeyError:
         print(f"[INFO] The {vs_dict['product-id']} is 3D and not 4D:"
               " it does not contain depth dimension.")
+    if len(vs_dict['date-min']) == 12:
+        dtformat = '%Y-%m-%d'
+    elif len(vs_dict['date-min']) > 12:
+        dtformat = '%Y-%m-%d %H:%M:%S'
     vs_dict['dt-date-min'] = dt.datetime.strptime(vs_dict['date-min'][1:-1],
-                                                  '%Y-%m-%d %H:%M:%S')
+                                                  dtformat)
     vs_dict['dt-date-max'] = dt.datetime.strptime(vs_dict['date-max'][1:-1],
-                                                  '%Y-%m-%d %H:%M:%S')
+                                                  dtformat)
+    if vs_dict['dt-date-max'].day == 1:
+        vs_dict['dt-date-max'] = vs_dict['dt-date-max'] + dt.timedelta(days=1)
     vs_dict['delta-days'] = vs_dict['dt-date-max'] - vs_dict['dt-date-min']
     vs_dict['prefix'] = '_'.join(
         list((vs_dict['service-id'].split('-')[0]).split('_')[i]
@@ -465,7 +472,7 @@ def get_dates_stack(vs_dict, check_stack, size=None, renew=None):
                                                  date_in.day, 0)
         vs_dict['format'] = "%Y"
     else:
-        print(f'No matching stack queries found: {check_stack}')
+        print(f'No matching stack queries found for: {check_stack}')
     return vs_dict
 
 
@@ -523,7 +530,8 @@ def viewscript_dict_to_string(size=None, strict=None, cmd=None, **kwargs):
     if 'depth-max' in kwargs:
         vs_string.append(f"--depth-max {kwargs['depth-max']}")
     if 'variable' in kwargs:
-        if type(kwargs['variable']) == list:
+        #if type(kwargs['variable']) == list:
+        if isinstance(kwargs['variable'], list):
             for var in kwargs['variable']:
                 vs_string.append(f"--variable {var}")
             # re-written due to pylint #3397
@@ -536,6 +544,52 @@ def viewscript_dict_to_string(size=None, strict=None, cmd=None, **kwargs):
         vs_string.append(f"--out-dir {kwargs['target_directory']}")
     command = ' '.join(vs_string)
     return command
+
+
+def get_data(command=None, user=None, pwd=None, size=None):
+    """
+    Returns status of binary netCDF file or, if ``size`` is specified,
+    potential result file size, whose units is `kBytes`.
+
+    Parameters
+    ----------
+    command : TYPE, optional
+        DESCRIPTION. The default is None.
+    user : TYPE, optional
+        DESCRIPTION. The default is None.
+    pwd : TYPE, optional
+        DESCRIPTION. The default is None.
+    size : TYPE, optional
+        DESCRIPTION. The default is None.
+
+    Returns
+    -------
+    returncode : TYPE
+        DESCRIPTION.
+    message : TYPE
+        DESCRIPTION.
+
+    """
+    if not user and not pwd:
+        user, pwd = get_credentials()
+    if not command:
+        view_myscript = get_viewscript()
+        command = view_myscript.replace(
+            '--out-dir <OUTPUT_DIRECTORY> --out-name <OUTPUT_FILENAME> '
+            '--user <USERNAME> --pwd <PASSWORD>', '')
+    msg = ''
+    if size:
+        msg = '--size -o console'
+    get_command = ' '.join([command, msg, '-q -u ', user, ' -p ', pwd])
+    cmd_rep = get_command.replace(get_command.split(' ')[-1], '****')
+    logging.info("SUBMIT REQUEST: %s", cmd_rep)
+    process = subprocess.Popen(get_command,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               shell=True)
+    message, _ = process.communicate()
+    returncode = process.returncode
+    return returncode, message
 
 
 def check_data(returncode,
@@ -584,13 +638,19 @@ def check_data(returncode,
                     if b'code="005-0"' in message:
                         valid_check = True
                 elif b'code="005-0"' not in message and b'code="005-7"' in message:
-                    req_size = convert_size_hr(
-                        (float(str(message).split('=')[-1].split('"')[1])) *
-                        1000)
+                    # Handling exceptions due to changes in MOTU API from v3.10 to v3.12
+                    try:
+                        req_size = convert_size_hr(
+                            (float(str(message).split('=')[-1].split('"')[1])) *
+                            1000)
+                    except ValueError:
+                        req_size = convert_size_hr(
+                            (float(str(message).split('=')[4].split('"')[1])) *
+                            1000)
                     treshold_size = convert_size_hr(1.0E8 * 1000)
                     if req_size > treshold_size:
                         token = hashlib.md5(
-                            (':'.join([command,
+                            (':'.join([command.rstrip(),
                                        user])).encode('utf-8')).hexdigest()
                         token_url = 'https://github.com/copernicusmarine/cmemsapi/blob/master/_transactions' # pylint: disable=line-too-long
                         resp = rq.get(f'{token_url}/{token}')
@@ -636,49 +696,6 @@ def check_data(returncode,
     return valid_check
 
 
-def get_data(command=None, user=None, pwd=None, size=None):
-    """
-    Returns status of binary netCDF file or, if ``size`` is specified,
-    potential result file size, whose units is `kBytes`.
-
-    Parameters
-    ----------
-    command : TYPE, optional
-        DESCRIPTION. The default is None.
-    user : TYPE, optional
-        DESCRIPTION. The default is None.
-    pwd : TYPE, optional
-        DESCRIPTION. The default is None.
-    size : TYPE, optional
-        DESCRIPTION. The default is None.
-
-    Returns
-    -------
-    returncode : TYPE
-        DESCRIPTION.
-    message : TYPE
-        DESCRIPTION.
-
-    """
-    if not user and not pwd:
-        user, pwd = get_credentials()
-    if not command:
-        command = get_viewscript()
-    msg = ''
-    if size:
-        msg = '--size -o console'
-    get_command = ' '.join([command, msg, '-q -u ', user, ' -p ', pwd])
-    cmd_rep = get_command.replace(get_command.split(' ')[-1], '****')
-    logging.info("SUBMIT REQUEST: %s", cmd_rep)
-    process = subprocess.Popen(get_command,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE,
-                               shell=True)
-    message, _ = process.communicate()
-    returncode = process.returncode
-    return returncode, message
-
-
 def process_viewscript(target_directory,
                        view_myscript=None,
                        user=None,
@@ -720,7 +737,7 @@ def process_viewscript(target_directory,
         view_myscript = get_viewscript()
     else:
         uni_test = [
-            'python -m motuclient --motu http://', ' '.join([
+            'python -m motuclient --motu http', ' '.join([
                 '--out-dir <OUTPUT_DIRECTORY> --out-name <OUTPUT_FILENAME>',
                 '--user <USERNAME> --pwd <PASSWORD>'
             ])
@@ -786,9 +803,9 @@ def process_viewscript(target_directory,
         msg = (f'[INFO] Data requests will be submitted by '
                f'{stack} stacks.')
     except NameError:
-        stack = 'month'
+        stack = 'day'
         msg = ('[WARNING] No matching temporal resolution. '
-               'To be coded using CSW. Stack is set to month.')
+               f'To be coded using CSW. Stack is set to {stack}.')
     print(msg)
     print('\n+------------------------------------+\n| ! - CONNECTION TO CMEMS'
           'HUB - OPEN |\n+------------------------------------+\n\n')
@@ -812,11 +829,12 @@ def process_viewscript(target_directory,
                     date_end_format + vs_dict['suffix']
                 ])
             command = viewscript_dict_to_string(cmd=True, **vs_dict)
+            outname = vs_dict['outname']
             print(
                 '\n----------------------------------\n'
                 '- ! - Processing dataset request : '
-                f"{vs_dict['outname']}\n----------------------------------\n")
-            if not Path(target_directory / vs_dict['outname']).exists():
+                f"{outname}\n----------------------------------\n")
+            if not Path(target_directory / outname).exists():
                 print('## MOTU API COMMAND ##')
                 print(command.replace(user, '*****').replace(pwd, '*****'))
                 print(
@@ -826,13 +844,12 @@ def process_viewscript(target_directory,
                     ' dataset on the fly. Please wait. \n')
                 returncode, message = get_data(command, user, pwd)
                 if check_data(returncode, message):
-                    outname = vs_dict['outname']
                     print('[INFO] The dataset for {} has been stored in {}.'.
                           format(outname, target_directory))
                 else:
                     retry_flag = True
             else:
-                print(f"[INFO] The dataset for {vs_dict['outname']} "
+                print(f"[INFO] The dataset for {outname} "
                       f"has already been downloaded in {target_directory}\n")
             date_start = vs_dict['cmd-date-max'] + dt.timedelta(days=1)
             vs_dict = get_dates_stack(vs_dict, stack, renew=date_start)
@@ -844,7 +861,7 @@ def process_viewscript(target_directory,
         if retry == 3 and 'ERROR' in logfile.read():
             print("## YOUR ATTENTION IS REQUIRED ##")
             print(f'Some download requests failed, though {retry} retries. '
-                  'Please see recommendation in {LOGFILE})')
+                  f'Please see recommendation in {LOGFILE})')
             print('TIPS: you can also apply hereafter recommendations.'
                   '\n1.  Do not move netCDF files'
                   '\n2.  Double check if a change must be done in the '
@@ -1142,7 +1159,7 @@ def set_outputfile(file_pattern,
         target_out_directory = Path(target_out_directory)
     if not target_out_directory.exists():
         target_out_directory.mkdir(parents=True)
-    if not end_year:
+    if start_year == end_year or not end_year:
         outputfile = target_out_directory / f'{file_pattern}-{start_year}.nc'
     else:
         outputfile = target_out_directory / \
@@ -1168,7 +1185,7 @@ def over_write(outputfile):
     ok_overwrite = True
     if outputfile.exists():
         ok_overwrite = query(
-            f'[ACTION] The file {outputfile} already exists. Do you want'
+            f'[ACTION] The file {outputfile} already exists. Do you want '
             f'{BOLD}to overwrite{END} it?', 'no')
     return ok_overwrite
 
@@ -1311,10 +1328,12 @@ def to_csv(mds, outputfile):
         print('[WARNING-CSV] Writing to disk action has been aborted by user '
               f'due to very high number of rows ({nb_grid_pts}) exceeding most '
               'computers and softwares limits (such as MS Excel).')
-        print(''.join(
-            ('[INFO-CSV] A new version will be proposed to handle '
-             'this use case automatically by splitting big table '
-             'in several spreadsheets.\n[INFO-CSV] To upvote this feature, ',
+        print(' '.join(
+            ('[INFO-CSV] A new function is under beta-version to handle '
+             'this use case automatically.\n'
+             '[ACTION-CSV] Usage:\n'
+             'cmemstb to_mfcsv PATH_TO_NETCDF_DIRECTORY PATH_TO_OUTPUT_DIRECTORY\n'
+             '[INFO-CSV] To upvote this feature,',
              msg2)))
     try:
         mds.close()
@@ -1322,6 +1341,104 @@ def to_csv(mds, outputfile):
     except NameError:
         print(''.join(('[DEBUG] ', msg2)))
     return csv
+
+
+def to_mfcsv(input_directory, output_directory, max_depth_level=None):
+    """
+    Convert netcdf file(s) to multiple csv files, based on MS Excel Limits.
+
+    Parameters
+    ----------
+    input_directory : TYPE
+        DESCRIPTION.
+    output_directory : TYPE
+        DESCRIPTION.
+    max_depth_level : TYPE, optional
+        DESCRIPTION. The default is None.
+
+    Returns
+    -------
+    mfcsv : TYPE
+        DESCRIPTION.
+
+    """
+    mfcsv = False
+    if isinstance(input_directory, xr.Dataset):
+        mds = input_directory
+    else:
+        try:
+            # Either a string glob in the form "path/to/my/files/*.nc"
+            # or an explicit list of files to open.
+            mds = xr.open_mfdataset(input_directory, combine='by_coords')
+        except Exception:
+            input_directory = Path(input_directory)
+            mds = xr.open_mfdataset(
+                [str(item) for item in list(input_directory.glob('*.nc'))],
+                combine='by_coords')
+
+    if isinstance(output_directory, str):
+        output_directory = Path(output_directory)
+    try:
+        if not output_directory.exists():
+            output_directory.mkdir(parents=True)
+            print(f'[INFO] Directory successfully created : {output_directory}.')
+    except Exception as exception:
+        print(f"[ERROR] Failed to create directory due to {str(exception)}.")
+
+    ms_excel_row_limit = 1_048_576
+    space = '-' * 17
+    nb_grid_pts = reduce((lambda x, y: x * y),
+                         list([len(mds[c]) for c in mds.coords]))
+    if nb_grid_pts > ms_excel_row_limit:
+        print(f"[INFO] The total number of rows for a single CSV file exceeds MS Excel limit.")
+    if max_depth_level is None:
+        depth = len(mds.depth)
+    elif max_depth_level < 0:
+        print(f"[ERROR] Maximum depth level must be a positive index"
+              f" from 0 to {len(mds.depth)}")
+        return mfcsv
+    elif max_depth_level >= 0:
+        depth = max_depth_level
+    print(f"[INFO] As a consequence, the total number of CSV files "
+          f"to be generated is: {len(mds.time) * (depth + 1)}")
+
+    variable_name = list(mds.data_vars.keys())[0]
+
+    for t in range(len(mds.time)):
+        for d in range(len(mds.depth)):
+            if d > depth:
+                break
+            DF = mds.isel(depth=d, time=t).to_dataframe()
+            if not DF[variable_name].dropna().empty:
+                t_format = pd.to_datetime(str(DF['time'].values[0])).strftime("%Y%m%d")
+                v_format = '_'.join([DF[column].name for column in DF if column not in ['lon', 'lat', 'longitude', 'latitude', 'depth', 'time']])
+                try:
+                    gb_format = '_'.join([str(len(mds[lonlat])) for lonlat in mds.coords if lonlat not in ['depth', 'time']])
+                except Exception as exception:
+                    print(f"[ERROR] Failed to set boundingbox: {str(exception)}")
+                    output_filename = f'CMEMS-time_{t_format}-depth_{d}-{v_format}.csv'
+                else:
+                    output_filename = f'CMEMS-gridbox_{gb_format}-time_{t_format}-depth_{d}-{v_format}.csv'
+                finally:
+                    output_fpath = output_directory / output_filename
+                if not output_fpath.exists():
+                    try:
+                        DF.dropna().to_csv(output_fpath)
+                    except Exception as exception:
+                        print(f"[ERROR] Failed to write to disk: {repr(exception)}.")
+                    else:
+                        msg = ''.join(
+                            (f"[INFO] {space}\n", f"[INFO-CSV] Output file :"
+                             f" {output_fpath}\n",
+                             f"[INFO-CSV] File format : Comma-Separated Values\n",
+                             f"[INFO-CSV] Preview Stat:\n {DF.dropna().describe()}\n",
+                             f"[INFO] {space}"))
+                        print(''.join(("[INFO] CONVERTING TO CSV\n", msg)))
+                else:
+                    print(f"[INFO] The CSV file {output_filename} already exists"
+                          f" in {output_directory.absolute()}.")
+    mfcsv = True
+    return mfcsv
 
 
 def to_nc4_csv(ncfiles, outputfile, skip_csv=False, default_nc_size=None):
@@ -1507,11 +1624,11 @@ def get(local_storage_directory=None,
     Ex 2. Get data matching a ``VIEW SCRIPT`` template command passed as `parameter`:
 
     >>> cmemstb get --view_myscript="python -m motuclient --motu https://nrt.cmems-du.eu/motu-web/Motu --service-id GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS --product-id global-analysis-forecast-phy-001-024 --longitude-min -20 --longitude-max 45 --latitude-min 25 --latitude-max 72 --date-min \\"2019-08-18 12:00:00\\" --date-max \\"2020-08-31 12:00:00\\" --depth-min 0.493 --depth-max 0.4942 --variable thetao --out-dir <OUTPUT_DIRECTORY> --out-name <OUTPUT_FILENAME> --user <USERNAME> --pwd <PASSWORD>"
-	
-    See Also
-    --------
+
+    Notes
+    -----
     For Windows Operating System Users and when using the ``--view_myscript``
-    as parameter, you might want to double check that 
+    as parameter, you might want to double check that
     ``double quote`` around dates are well escaped (see above example).
     """
     target_directory = set_target_directory(local_storage_directory)
@@ -1548,7 +1665,8 @@ def cli():
         'set_target_directory': set_target_directory,
         'to_nc4_csv': to_nc4_csv,
         'to_nc4': to_nc4,
-        'to_csv': to_csv
+        'to_csv': to_csv,
+        'to_mfcsv': to_mfcsv
     })
 
 
