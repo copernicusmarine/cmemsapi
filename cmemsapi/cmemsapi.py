@@ -1447,7 +1447,7 @@ def to_mfcsv(input_directory, output_directory, max_depth_level=None):
             DF = mds.isel(time=t).to_dataframe()
             if not DF[variable_name].dropna().empty:
                 t_format = pd.to_datetime(str(DF['time'].values[0])).strftime("%Y%m%d")
-                v_format = '_'.join([DF[column].name for column in DF if column not in ['lon', 'lat', 'longitude', 'latitude', 'depth', 'time']])
+                v_format = '_'.join([DF[column].name for column in DF if column not in ['lon', 'lat', 'longitude', 'latitude', 'time']])
                 try:
                     gb_format = '_'.join([str(len(mds[lonlat])) for lonlat in mds.coords if lonlat not in ['depth', 'time']])
                 except Exception as exception:
