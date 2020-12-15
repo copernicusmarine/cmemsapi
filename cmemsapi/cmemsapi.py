@@ -1391,24 +1391,60 @@ def to_mfcsv(input_directory, output_directory, max_depth_level=None):
                          list([len(mds[c]) for c in mds.coords]))
     if nb_grid_pts > ms_excel_row_limit:
         print(f"[INFO] The total number of rows for a single CSV file exceeds MS Excel limit.")
-    if max_depth_level is None:
-        depth = len(mds.depth)
-    elif max_depth_level < 0:
-        print(f"[ERROR] Maximum depth level must be a positive index"
-              f" from 0 to {len(mds.depth)}")
-        return mfcsv
-    elif max_depth_level >= 0:
-        depth = max_depth_level
-    print(f"[INFO] As a consequence, the total number of CSV files "
-          f"to be generated is: {len(mds.time) * (depth + 1)}")
-
+    
     variable_name = list(mds.data_vars.keys())[0]
+    
+    try:
+        depth = len(mds.depth)
+        if max_depth_level is None:
+            depth = len(mds.depth)
+        elif max_depth_level < 0:
+            print(f"[ERROR] Maximum depth level must be a positive index"
+                  f" from 0 to {len(mds.depth)}")
+            return mfcsv
+        elif max_depth_level >= 0:
+            depth = max_depth_level
+        print(f"[INFO] As a consequence, the total number of CSV files "
+              f"to be generated is: {len(mds.time) * (depth + 1)}")
 
-    for t in range(len(mds.time)):
-        for d in range(len(mds.depth)):
-            if d > depth:
-                break
-            DF = mds.isel(depth=d, time=t).to_dataframe()
+        for t in range(len(mds.time)):
+            for d in range(len(mds.depth)):
+                if d > depth:
+                    break
+                DF = mds.isel(depth=d, time=t).to_dataframe()
+                if not DF[variable_name].dropna().empty:
+                    t_format = pd.to_datetime(str(DF['time'].values[0])).strftime("%Y%m%d")
+                    v_format = '_'.join([DF[column].name for column in DF if column not in ['lon', 'lat', 'longitude', 'latitude', 'depth', 'time']])
+                    try:
+                        gb_format = '_'.join([str(len(mds[lonlat])) for lonlat in mds.coords if lonlat not in ['depth', 'time']])
+                    except Exception as exception:
+                        print(f"[ERROR] Failed to set boundingbox: {str(exception)}")
+                        output_filename = f'CMEMS-time_{t_format}-depth_{d}-{v_format}.csv'
+                    else:
+                        output_filename = f'CMEMS-gridbox_{gb_format}-time_{t_format}-depth_{d}-{v_format}.csv'
+                    finally:
+                        output_fpath = output_directory / output_filename
+                    if not output_fpath.exists():
+                        try:
+                            DF.dropna().to_csv(output_fpath)
+                        except Exception as exception:
+                            print(f"[ERROR] Failed to write to disk: {repr(exception)}.")
+                        else:
+                            msg = ''.join(
+                                (f"[INFO] {space}\n", f"[INFO-CSV] Output file :"
+                                 f" {output_fpath}\n",
+                                 f"[INFO-CSV] File format : Comma-Separated Values\n",
+                                 f"[INFO-CSV] Preview Stat:\n {DF.dropna().describe()}\n",
+                                 f"[INFO] {space}"))
+                            print(''.join(("[INFO] CONVERTING TO CSV\n", msg)))
+                    else:
+                        print(f"[INFO] The CSV file {output_filename} already exists"
+                              f" in {output_directory.absolute()}.")
+    except AttributeError:
+        print("[INFO] As a consequence, the total number of CSV files "
+              f"to be generated is: {len(mds.time)}")
+        for t in range(len(mds.time)):
+            DF = mds.isel(time=t).to_dataframe()
             if not DF[variable_name].dropna().empty:
                 t_format = pd.to_datetime(str(DF['time'].values[0])).strftime("%Y%m%d")
                 v_format = '_'.join([DF[column].name for column in DF if column not in ['lon', 'lat', 'longitude', 'latitude', 'depth', 'time']])
@@ -1416,9 +1452,9 @@ def to_mfcsv(input_directory, output_directory, max_depth_level=None):
                     gb_format = '_'.join([str(len(mds[lonlat])) for lonlat in mds.coords if lonlat not in ['depth', 'time']])
                 except Exception as exception:
                     print(f"[ERROR] Failed to set boundingbox: {str(exception)}")
-                    output_filename = f'CMEMS-time_{t_format}-depth_{d}-{v_format}.csv'
+                    output_filename = f'CMEMS-time_{t_format}-{v_format}.csv'
                 else:
-                    output_filename = f'CMEMS-gridbox_{gb_format}-time_{t_format}-depth_{d}-{v_format}.csv'
+                    output_filename = f'CMEMS-gridbox_{gb_format}-time_{t_format}-{v_format}.csv'
                 finally:
                     output_fpath = output_directory / output_filename
                 if not output_fpath.exists():
