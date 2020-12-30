@@ -52,7 +52,7 @@ setup(
     "from Copernicus Marine Database.",
     install_requires=REQUIREMENTS,
     license="MIT",
-    long_description=open('README.md').read(),
+    long_description='long description',
     long_description_content_type="text/markdown",
     include_package_data=True,
     keywords='cmemsapi',
@@ -64,5 +64,5 @@ setup(
     url='https://github.com/copernicusmarine/cmemsapi',
     version='0.1.17',
     zip_safe=False,
-    entry_points={'console_scripts':['cmemstb=cmemsapi.cmemsapi:cli']},
+    entry_points={'console_scripts':['cmust=cmemsapi.cmemsapi:cli']},
 )
