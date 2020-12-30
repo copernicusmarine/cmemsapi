@@ -26,7 +26,7 @@ sys.path.insert(0, str(CURRENT_DIR))
 #    README = readme_file.read()
 
 #REQUIREMENTS = [line.strip() for line in open('requirements_prod.txt')]
-REQUIREMENTS = ["dask fire funcy ipython lxml motuclient==1.8.4 netCDF4 pandas requests scipy toolz xarray ".split(' ')]
+REQUIREMENTS = ["dask fire funcy ipython jedi<0.18.0 lxml motuclient==1.8.4 netCDF4<=1.5.4 pandas requests scipy toolz xarray ".split(' ')]
 
 SETUP_REQUIREMENTS = []
 
@@ -52,7 +52,7 @@ setup(
     "from Copernicus Marine Database.",
     install_requires=REQUIREMENTS,
     license="MIT",
-    long_description='long description',
+    long_description=open('README.md').read(),
     long_description_content_type="text/markdown",
     include_package_data=True,
     keywords='cmemsapi',
