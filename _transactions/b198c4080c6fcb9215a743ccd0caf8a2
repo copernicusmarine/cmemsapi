@@ -1,4 +1,0 @@
-{
-topic : 'GLORYS12 auth. testing',
-cmd : 'python -m motuclient --motu https://my.cmems-du.eu/motu-web/Motu --service-id GLOBAL_MULTIYEAR_PHY_001_030-TDS --product-id cmems_mod_glo_phy_my_0.083_P1D-m --longitude-min -5 --longitude-max 50 --latitude-min -50 --latitude-max -10 --date-min "1999-01-01 12:00:00" --date-max "2002-12-31 12:00:00" --depth-min 0.494 --depth-max 5727.917 --variable so --variable thetao --variable uo --variable vo --variable zos'
-}
