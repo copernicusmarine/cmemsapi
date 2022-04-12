@@ -1,0 +1,6 @@
+{
+    'source' : '1154137100275398',
+    'topic'  : 'BALTIC Multiyear authorization for TTU TALTECH ',
+    'size'   : '554.391 GB',
+    'query'  : 'python -m motuclient --motu https://my.cmems-du.eu/motu-web/Motu --service-id BALTICSEA_REANALYSIS_WAV_003_015-TDS --product-id dataset-bal-reanalysis-wav-hourly --longitude-min 9.0139 --longitude-max 30.2077 --latitude-min 53.0083 --latitude-max 65.9078 --date-min "1993-01-01 01:00:00" --date-max "2021-01-01 00:00:00" --variable VHM0'
+}
