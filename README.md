@@ -10,7 +10,57 @@
     <a href="https://github.com/copernicusmarine/cmemsapi"><img src="https://img.shields.io/badge/platform-windows%20%7C%20linux%20%7C%20macos-lightgrey" alt="Supported Platforms" /></a>
 </p>
 
-A python package behaving as `Tooolbox` to ease interaction with [Copernicus Marine Earth Observation Database](https://marine.copernicus.eu) (pre-process, get and post-process data) while offering CLI & GUI capabilities.
+## What is it?
+
+**cmust** (Copernicus Marine User Support Toolbox - cmemsapi)
+is a python package behaving as `Toolbox` to ease interaction
+with [Copernicus Marine Earth Observation Database](https://marine.copernicus.eu)
+(pre-process, get and post-process data) while offering
+CLI & GUI capabilities.
+
+## Main Features
+Here are just a few of the things that **cmust** does well:
+
+- Retrieving **several GB** of data **in a single file**. _At this moment, the threshold of default server capabilities is 1024 MB per data request._
+
+- Retrieving **several years or decades** of high temporal resolution data **in a single file**. _At this moment, the threshold of default server capabilities is about ~720 layers per request._
+
+- Retrieving the data in **an ascii format**, such as `.csv` **tabular format** or in a binary but **cloud optimized format*, such as `.nc4` (netcdf4) or `.zarr`. _At this moment, the default server capabilities deliver binary file format in `.nc` (netcdf 3)._
+
+
+## Where to get it
+The source code is currently hosted on GitHub at:
+https://github.com/copernicusmarine/cmemsapi
+
+Binary installers for the latest released version are available at the [Python
+Package Index (PyPI)](https://pypi.org/project/cmemsapi/) and on [Conda](https://anaconda.org/cmust/cmemsapi).
+
+```sh
+# PyPI (preferred if already isolated environment)
+pip install cmemsapi
+```
+
+```sh
+# or Conda
+conda install -c cmust cmemsapi
+# or
+conda create --name cmems --channel conda-forge --channel cmust python=3.8 cmemsapi --yes
+```
+
+## How to use it
+
+To be interactively guided and get Copernicus Marine data being download locally, you can fire `get` method and follow its instructions, either:
+ 
+```py
+# from a Python environment
+from cmemsapi import cmemsapi as cmust
+cmust.get()
+```
+
+```sh
+# from a terminal
+cmust get
+```
 
 **Credits**: E.U. Copernicus Marine Service Information
 
