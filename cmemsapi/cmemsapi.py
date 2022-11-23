@@ -1527,7 +1527,8 @@ def to_nc4_csv(ncfiles, outputfile, skip_csv=False, default_nc_size=None):
 def post_processing(outname,
                     target_directory,
                     target_out_directory=None,
-                    delete_files=True):
+                    delete_files=True,
+                    skip_csv=False):
     """
     Post-process the data already located on disk.
 
@@ -1548,6 +1549,8 @@ def post_processing(outname,
         DESCRIPTION. The default is None.
     delete_files : TYPE, optional
         DESCRIPTION. The default is True.
+    skip_csv: TYPE, optionale
+        DESCRIPTION. The default is False
 
     Raises
     ------
@@ -1598,7 +1601,7 @@ def post_processing(outname,
                                                target_directory,
                                                target_out_directory,
                                                start_year=year)
-                nc4, csv, ow_choice = to_nc4_csv(ncfiles, outfilemerged)
+                nc4, csv, ow_choice = to_nc4_csv(ncfiles, outfilemerged, skip_csv)
         if all([delete_files, nc4]):
             del_ncfiles(sel_files)
         processing = True
@@ -1611,7 +1614,8 @@ def get(local_storage_directory=None,
         user=None,
         pwd=None,
         forcestack=False,
-        delete_files=True):
+        delete_files=True,
+        skip_csv=False):
     """Download and post-process files to both compressed and tabular formats,
     if applicable.
 
@@ -1641,6 +1645,8 @@ def get(local_storage_directory=None,
         DESCRIPTION. The default is False.
     delete_files : TYPE, optional
         DESCRIPTION. The default is True.
+    skip_csv: TYPE, optional
+        DESCRIPTION. The default is False.
 
     Returns
     -------
